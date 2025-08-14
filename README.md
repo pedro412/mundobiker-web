@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MundoBiker — Comunidad de Motociclistas
 
-## Getting Started
+Pequeña descripción: panel y gestión para clubes, eventos y miembros con autenticación JWT y una UX móvil-first.
 
-First, run the development server:
+## Resumen (qué hay hasta ahora)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Frontend en Next.js (App Router) con TypeScript.
+- Autenticación JWT contra un backend (se diseñó para Django REST Framework).
+- Formularios con React Hook Form + Zod para validación tipada y mensajes en español.
+- Gestión global de auth con React Context + useReducer, tokens en localStorage y refresh automático.
+- UI con Tailwind CSS y componentes reutilizables bajo `components/ui/`.
+- Navegación móvil: barra superior (usuario + logout) y navegación inferior fija.
+
+## Tech stack
+
+- Next.js (App Router) + TypeScript
+- Tailwind CSS
+- React Hook Form + Zod
+- React Context + useReducer (auth)
+- Django REST Framework (backend, se espera endpoints JWT)
+
+## Funcionalidades implementadas
+
+- Registro e inicio de sesión con validación cliente.
+- Gestión de tokens (access / refresh) con refresh automático y cierre de sesión al fallar.
+- Dashboard protegido (`app/page.tsx`) que redirige a `/auth/login` si no hay sesión.
+- `TopNavigation` muestra el usuario conectado y el botón de cerrar sesión.
+- `BottomNavigation` para navegación móvil.
+- Componentes UI: tarjetas, botones, formularios, inputs.
+
+## Estructura relevante
+
+- `app/` — rutas y layout
+- `app/layout.tsx` — provee `AuthProvider`, `TopNavigation` y `BottomNavigation`
+- `contexts/AuthContext.tsx` — estado de auth y acciones (login, logout, refresh)
+- `components/navigation/TopNavigation.tsx` — barra superior con usuario
+- `components/navigation/BottomNavigation.tsx` — navegación inferior móvil
+- `components/ui/` — primitives (button, input, card, form)
+
+## Desarrollo local
+
+1. Copia el ejemplo de variables de entorno y ajusta (crear `.env.local`):
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Instala dependencias y ejecuta en modo desarrollo:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Abre http://localhost:3000
 
-## Learn More
+Nota: la app espera un backend con endpoints JWT (por ejemplo `/api/auth/jwt-create/` y `/api/auth/jwt-refresh/`).
 
-To learn more about Next.js, take a look at the following resources:
+## Notas de arquitectura y decisiones
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `AuthContext` centraliza la lógica de autenticación; sus acciones están memoizadas para evitar renders innecesarios y ciclos de efecto.
+- Tokens se guardan en `localStorage` para simplicidad; para producción considerar httpOnly cookies.
+- Las páginas que requieren sesión verifican `state.isAuthenticated` y `state.user` y redirigen si no hay sesión.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Próximos pasos recomendados
 
-## Deploy on Vercel
+- Añadir tests de integración para flujo de login / refresh.
+- Mejorar manejo de errores e introducir toasts o alertas globales.
+- Evaluar estrategias de almacenamiento de tokens más seguras (httpOnly cookies) y CSRF.
+- Crear scripts o documentación de despliegue (Vercel, Docker, etc.).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Si quieres, añado una sección "Troubleshooting" con errores comunes y variables de entorno necesarias.
