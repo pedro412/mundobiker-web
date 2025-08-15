@@ -176,11 +176,13 @@ export default function ProfilePage() {
                   </Button>
                 </div>
                 {message && (
-                  <div className={`mt-4 p-3 rounded-md ${
-                    message.includes('correctamente') 
-                      ? 'bg-green-50 text-green-800 border border-green-200' 
-                      : 'bg-red-50 text-red-800 border border-red-200'
-                  }`}>
+                  <div
+                    className={`mt-4 p-3 rounded-md ${
+                      message.includes('correctamente')
+                        ? 'bg-green-50 text-green-800 border border-green-200'
+                        : 'bg-red-50 text-red-800 border border-red-200'
+                    }`}
+                  >
                     {message}
                   </div>
                 )}

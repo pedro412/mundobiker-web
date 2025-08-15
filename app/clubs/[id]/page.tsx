@@ -14,9 +14,9 @@ import {
 } from '@/components/ui/breadcrumb';
 
 interface ClubDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 async function getClub(id: string): Promise<Club | null> {
@@ -38,7 +38,8 @@ async function getChapters(clubId: string): Promise<Chapter[]> {
 }
 
 export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
-  const [club, chapters] = await Promise.all([getClub(params.id), getChapters(params.id)]);
+  const { id } = await params;
+  const [club, chapters] = await Promise.all([getClub(id), getChapters(id)]);
 
   if (!club) {
     notFound();
@@ -180,7 +181,8 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: ClubDetailPageProps) {
-  const club = await getClub(params.id);
+  const { id } = await params;
+  const club = await getClub(id);
 
   if (!club) {
     return {

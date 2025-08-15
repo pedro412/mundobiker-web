@@ -14,9 +14,9 @@ import {
 } from '@/components/ui/breadcrumb';
 
 interface ChapterDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 async function getChapter(id: string): Promise<Chapter | null> {
@@ -60,7 +60,8 @@ function getRoleBadgeVariant(role: string): 'default' | 'secondary' | 'destructi
 }
 
 export default async function ChapterDetailPage({ params }: ChapterDetailPageProps) {
-  const [chapter, members] = await Promise.all([getChapter(params.id), getMembers(params.id)]);
+  const { id } = await params;
+  const [chapter, members] = await Promise.all([getChapter(id), getMembers(id)]);
 
   if (!chapter) {
     notFound();
@@ -257,7 +258,8 @@ export default async function ChapterDetailPage({ params }: ChapterDetailPagePro
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: ChapterDetailPageProps) {
-  const chapter = await getChapter(params.id);
+  const { id } = await params;
+  const chapter = await getChapter(id);
 
   if (!chapter) {
     return {
