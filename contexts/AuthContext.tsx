@@ -161,7 +161,12 @@ const getStoredUser = (): User | null => {
   try {
     const parsed = JSON.parse(userString);
     // Normalize shape: some responses may nest the user under a `user` key
-    if (parsed && typeof parsed === 'object' && 'user' in parsed && typeof parsed.user === 'object') {
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      'user' in parsed &&
+      typeof parsed.user === 'object'
+    ) {
       return parsed.user as User;
     }
     return parsed as User;
@@ -193,7 +198,8 @@ const storeAuthData = (user: User, access: string, refresh: string) => {
   if (typeof window === 'undefined') return;
 
   // Ensure we store the normalized user object (avoid nesting)
-  const toStore = user && typeof user === 'object' && 'user' in (user as any) ? (user as any).user : user;
+  const toStore =
+    user && typeof user === 'object' && 'user' in (user as any) ? (user as any).user : user;
   localStorage.setItem('user', JSON.stringify(toStore));
   localStorage.setItem('access', access);
   localStorage.setItem('refresh', refresh);
@@ -260,9 +266,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const loginData = JSON.parse(responseText);
 
       // Normalize user in case backend nests it under `user`
-      const savedUser = loginData && loginData.user && typeof loginData.user === 'object'
-        ? (loginData.user.user ? loginData.user.user : loginData.user)
-        : loginData.user || null;
+      const savedUser =
+        loginData && loginData.user && typeof loginData.user === 'object'
+          ? loginData.user.user
+            ? loginData.user.user
+            : loginData.user
+          : loginData.user || null;
 
       // Store in localStorage
       storeAuthData(savedUser as User, loginData.access, loginData.refresh);

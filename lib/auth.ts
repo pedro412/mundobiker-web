@@ -20,15 +20,15 @@ export interface LoginResponse {
 // Check if user is authenticated (has valid access token)
 export const isAuthenticated = (): boolean => {
   if (typeof window === 'undefined') return false;
-  
+
   const accessToken = localStorage.getItem('access');
   if (!accessToken) return false;
-  
+
   try {
     // Decode JWT payload (without verification - just to check expiration)
     const payload = JSON.parse(atob(accessToken.split('.')[1]));
     const currentTime = Date.now() / 1000;
-    
+
     // Check if token is expired
     return payload.exp > currentTime;
   } catch (error) {
@@ -40,14 +40,19 @@ export const isAuthenticated = (): boolean => {
 // Get current user data from localStorage
 export const getCurrentUser = (): User | null => {
   if (typeof window === 'undefined') return null;
-  
+
   const userString = localStorage.getItem('user');
   if (!userString) return null;
-  
+
   try {
     const parsed = JSON.parse(userString);
     // Normalize nested payloads: backend may store { user: { ... } }
-    if (parsed && typeof parsed === 'object' && 'user' in parsed && typeof parsed.user === 'object') {
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      'user' in parsed &&
+      typeof parsed.user === 'object'
+    ) {
       return parsed.user as User;
     }
     return parsed as User;
@@ -72,11 +77,11 @@ export const getRefreshToken = (): string | null => {
 // Clear all authentication data
 export const logout = (): void => {
   if (typeof window === 'undefined') return;
-  
+
   localStorage.removeItem('access');
   localStorage.removeItem('refresh');
   localStorage.removeItem('user');
-  
+
   // Dispatch custom event to notify components of auth change
   window.dispatchEvent(new Event('authChange'));
 };
@@ -85,7 +90,7 @@ export const logout = (): void => {
 export const refreshAccessToken = async (): Promise<string | null> => {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return null;
-  
+
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/jwt-refresh/`, {
       method: 'POST',
@@ -96,7 +101,7 @@ export const refreshAccessToken = async (): Promise<string | null> => {
         refresh: refreshToken,
       }),
     });
-    
+
     if (response.ok) {
       const data = await response.json();
       if (data.access) {
@@ -109,16 +114,19 @@ export const refreshAccessToken = async (): Promise<string | null> => {
   } catch (error) {
     console.error('Error refreshing token:', error);
   }
-  
+
   // If refresh fails, logout user
   logout();
   return null;
 };
 
 // Make authenticated API request with automatic token refresh
-export const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+export const authenticatedFetch = async (
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> => {
   let accessToken = getAccessToken();
-  
+
   // If no access token or expired, try to refresh
   if (!accessToken || !isAuthenticated()) {
     accessToken = await refreshAccessToken();
@@ -126,29 +134,29 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
       throw new Error('Authentication required');
     }
   }
-  
+
   // Add authorization header
   const authOptions: RequestInit = {
     ...options,
     headers: {
       ...options.headers,
-      'Authorization': `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   };
-  
+
   const response = await fetch(url, authOptions);
-  
+
   // If unauthorized and we have a refresh token, try to refresh and retry
   if (response.status === 401 && getRefreshToken()) {
     const newAccessToken = await refreshAccessToken();
     if (newAccessToken) {
       authOptions.headers = {
         ...authOptions.headers,
-        'Authorization': `Bearer ${newAccessToken}`,
+        Authorization: `Bearer ${newAccessToken}`,
       };
       return fetch(url, authOptions);
     }
   }
-  
+
   return response;
 };
