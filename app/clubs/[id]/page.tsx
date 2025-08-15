@@ -1,10 +1,10 @@
 import { clubsApi, chaptersApi } from '@/lib/api';
 import { Club, Chapter } from '@/types';
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -77,15 +77,14 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                 })}
               </p>
             </div>
-            {club.logo && (
-              <Image
-                src={club.logo}
-                alt={`${club.name} logo`}
-                width={96}
-                height={96}
-                className="w-24 h-24 object-contain rounded-lg"
-              />
-            )}
+            <OptimizedImage
+              src={club.logo}
+              alt={`${club.name} logo`}
+              width={96}
+              height={96}
+              className="w-24 h-24 object-contain rounded-lg"
+              fallbackSrc="https://mundobiker-web.vercel.app/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdemo%2Fimage%2Fupload%2Fw_400%2Ch_400%2Fc_pad%2Cb_auto%2Ff_auto%2Fq_auto%2Fv1%2Fcld-sample-2.jpg&w=96&h=96&q=75"
+            />
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
