@@ -51,9 +51,7 @@ const UserIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-interface BottomNavigationProps {}
-
-export default function BottomNavigation({}: BottomNavigationProps) {
+export default function BottomNavigation() {
   const pathname = usePathname();
   const { state } = useAuth();
   const isLoggedIn = state.isAuthenticated;

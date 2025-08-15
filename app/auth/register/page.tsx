@@ -124,7 +124,7 @@ export default function RegisterPage() {
         let errorData;
         try {
           errorData = JSON.parse(responseText);
-        } catch (parseError) {
+        } catch {
           errorData = { message: `HTTP ${response.status}: ${response.statusText}` };
         }
 

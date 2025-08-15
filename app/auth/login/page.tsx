@@ -64,13 +64,13 @@ export default function LoginPage() {
   // Clear error when component mounts (only once)
   useEffect(() => {
     clearError();
-  }, []); // Empty dependency array - only run once on mount
+  }, [clearError]); // Include clearError in dependency array
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
       await login(data.email, data.password);
       // Successful login will trigger redirect via useEffect above
-    } catch (error) {
+    } catch {
       // Error is handled by the auth context
     }
   };

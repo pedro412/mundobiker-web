@@ -47,7 +47,7 @@ export default function ProfilePage() {
       first_name: user?.first_name ?? '',
       last_name: user?.last_name ?? '',
     });
-  }, [user]);
+  }, [user, form]);
   // debug: normalized user available as `user`
   const onSubmit = (data: ProfileForm) => {
     (async () => {
@@ -81,7 +81,7 @@ export default function ProfilePage() {
         } else {
           setMessage('No se pudo actualizar el perfil.');
         }
-      } catch (e) {
+      } catch {
         setMessage('Error al actualizar.');
       } finally {
         setIsSaving(false);
@@ -171,8 +171,19 @@ export default function ProfilePage() {
                 />
 
                 <div className="flex justify-end">
-                  <Button type="submit">Guardar cambios</Button>
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                  </Button>
                 </div>
+                {message && (
+                  <div className={`mt-4 p-3 rounded-md ${
+                    message.includes('correctamente') 
+                      ? 'bg-green-50 text-green-800 border border-green-200' 
+                      : 'bg-red-50 text-red-800 border border-red-200'
+                  }`}>
+                    {message}
+                  </div>
+                )}
               </form>
             </Form>
           </CardContent>

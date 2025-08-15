@@ -1,9 +1,9 @@
 import { clubsApi, chaptersApi } from '@/lib/api';
 import { Club, Chapter } from '@/types';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   Breadcrumb,
@@ -77,9 +77,11 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
               </p>
             </div>
             {club.logo && (
-              <img
+              <Image
                 src={club.logo}
                 alt={`${club.name} logo`}
+                width={96}
+                height={96}
                 className="w-24 h-24 object-contain rounded-lg"
               />
             )}

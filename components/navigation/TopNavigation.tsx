@@ -15,8 +15,8 @@ export default function TopNavigation() {
     try {
       const saved = localStorage.getItem('theme');
       if (saved === 'dark' || saved === 'light') return saved;
-    } catch (e) {
-      // ignore
+    } catch {
+      // Ignore localStorage errors
     }
     if (
       typeof window !== 'undefined' &&
@@ -32,8 +32,8 @@ export default function TopNavigation() {
       if (theme === 'dark') document.documentElement.classList.add('dark');
       else document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', theme);
-    } catch (e) {
-      // ignore
+    } catch {
+      // ignore localStorage errors
     }
   }, [theme]);
 

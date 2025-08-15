@@ -216,7 +216,7 @@ export default async function ChapterDetailPage({ params }: ChapterDetailPagePro
                               {member.first_name} {member.last_name}
                             </h3>
                             {member.nickname && (
-                              <p className="text-sm text-gray-600">"{member.nickname}"</p>
+                              <p className="text-sm text-gray-600">&quot;{member.nickname}&quot;</p>
                             )}
                           </div>
                           <Badge variant={getRoleBadgeVariant(member.role)} className="text-xs">
