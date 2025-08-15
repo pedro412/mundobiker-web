@@ -41,3 +41,26 @@ export function getStaticImageUrl(relativePath: string | null | undefined, fallb
   
   return getImageUrl(relativePath);
 }
+
+/**
+ * Creates a placeholder image URL using a simple service
+ * Useful for development and testing
+ */
+export function getPlaceholderImageUrl(width: number = 200, height: number = 200, text: string = 'No Image'): string {
+  return `https://via.placeholder.com/${width}x${height}/e5e7eb/9ca3af?text=${encodeURIComponent(text)}`;
+}
+
+/**
+ * Validates if a URL is likely to be a valid image URL
+ */
+export function isValidImageUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
+  const lowerUrl = url.toLowerCase();
+  
+  return imageExtensions.some(ext => lowerUrl.includes(ext)) || 
+         lowerUrl.includes('image') || 
+         lowerUrl.includes('img') ||
+         lowerUrl.includes('placeholder');
+}

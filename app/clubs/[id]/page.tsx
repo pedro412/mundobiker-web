@@ -83,7 +83,6 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
               width={96}
               height={96}
               className="w-24 h-24 object-contain rounded-lg"
-              fallbackSrc="https://mundobiker-web.vercel.app/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fdemo%2Fimage%2Fupload%2Fw_400%2Ch_400%2Fc_pad%2Cb_auto%2Ff_auto%2Fq_auto%2Fv1%2Fcld-sample-2.jpg&w=96&h=96&q=75"
             />
           </div>
         </CardHeader>
