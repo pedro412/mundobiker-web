@@ -141,17 +141,21 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4 pt-20">
       <div className="w-full max-w-md">
         <Card className="shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-gray-900">Crear Cuenta</CardTitle>
-            <p className="text-gray-600 text-sm mt-2">Únete a la comunidad MundoBiker</p>
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Crear Cuenta
+            </CardTitle>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
+              Únete a la comunidad MundoBiker
+            </p>
           </CardHeader>
           <CardContent>
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md">
+                <p className="text-sm text-red-600 dark:text-red-200">{error}</p>
               </div>
             )}
 

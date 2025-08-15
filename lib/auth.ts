@@ -45,7 +45,12 @@ export const getCurrentUser = (): User | null => {
   if (!userString) return null;
   
   try {
-    return JSON.parse(userString);
+    const parsed = JSON.parse(userString);
+    // Normalize nested payloads: backend may store { user: { ... } }
+    if (parsed && typeof parsed === 'object' && 'user' in parsed && typeof parsed.user === 'object') {
+      return parsed.user as User;
+    }
+    return parsed as User;
   } catch (error) {
     console.error('Error parsing user data:', error);
     return null;

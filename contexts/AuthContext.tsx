@@ -39,6 +39,7 @@ export type AuthAction =
   | { type: 'AUTH_SUCCESS'; payload: { user: User; access: string; refresh: string } }
   | { type: 'AUTH_ERROR'; payload: string }
   | { type: 'AUTH_LOGOUT' }
+  | { type: 'AUTH_UPDATE_USER'; payload: User }
   | { type: 'TOKEN_REFRESH'; payload: string }
   | { type: 'CLEAR_ERROR' };
 
@@ -103,6 +104,12 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         error: null,
       };
 
+    case 'AUTH_UPDATE_USER':
+      return {
+        ...state,
+        user: action.payload,
+      };
+
     case 'TOKEN_REFRESH':
       return {
         ...state,
@@ -130,6 +137,7 @@ export interface AuthContextType {
   logout: () => void;
   refreshToken: () => Promise<string | null>;
   clearError: () => void;
+  updateUser: (payload: Partial<User>) => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -151,7 +159,12 @@ const getStoredUser = (): User | null => {
   if (!userString) return null;
 
   try {
-    return JSON.parse(userString);
+    const parsed = JSON.parse(userString);
+    // Normalize shape: some responses may nest the user under a `user` key
+    if (parsed && typeof parsed === 'object' && 'user' in parsed && typeof parsed.user === 'object') {
+      return parsed.user as User;
+    }
+    return parsed as User;
   } catch (error) {
     console.error('Error parsing stored user:', error);
     return null;
@@ -179,7 +192,9 @@ const clearStoredAuth = () => {
 const storeAuthData = (user: User, access: string, refresh: string) => {
   if (typeof window === 'undefined') return;
 
-  localStorage.setItem('user', JSON.stringify(user));
+  // Ensure we store the normalized user object (avoid nesting)
+  const toStore = user && typeof user === 'object' && 'user' in (user as any) ? (user as any).user : user;
+  localStorage.setItem('user', JSON.stringify(toStore));
   localStorage.setItem('access', access);
   localStorage.setItem('refresh', refresh);
 };
@@ -244,14 +259,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const loginData = JSON.parse(responseText);
 
+      // Normalize user in case backend nests it under `user`
+      const savedUser = loginData && loginData.user && typeof loginData.user === 'object'
+        ? (loginData.user.user ? loginData.user.user : loginData.user)
+        : loginData.user || null;
+
       // Store in localStorage
-      storeAuthData(loginData.user, loginData.access, loginData.refresh);
+      storeAuthData(savedUser as User, loginData.access, loginData.refresh);
 
       // Update state
       dispatch({
         type: 'AUTH_SUCCESS',
         payload: {
-          user: loginData.user,
+          user: savedUser,
           access: loginData.access,
           refresh: loginData.refresh,
         },
@@ -311,12 +331,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'CLEAR_ERROR' });
   }, []);
 
+  const updateUser = useCallback(
+    async (payload: Partial<User>): Promise<User | null> => {
+      const access = state.tokens.access;
+      if (!access) return null;
+
+      try {
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/me/`;
+        const response = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${access}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          let err;
+          try {
+            err = JSON.parse(text);
+          } catch (e) {
+            err = { message: text };
+          }
+          const message = parseDjangoErrors(err);
+          dispatch({ type: 'AUTH_ERROR', payload: message });
+          return null;
+        }
+
+        const updatedUserRaw = await response.json();
+        // Normalize possible nested payloads: some backends return { user: {...} }
+        const updatedUser =
+          updatedUserRaw && typeof updatedUserRaw === 'object' && 'user' in updatedUserRaw
+            ? (updatedUserRaw as any).user
+            : updatedUserRaw;
+
+        // Update localStorage and state with normalized user
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        dispatch({ type: 'AUTH_UPDATE_USER', payload: updatedUser });
+        return updatedUser as User;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Error updating user';
+        dispatch({ type: 'AUTH_ERROR', payload: message });
+        return null;
+      }
+    },
+    [state.tokens.access]
+  );
+
   const contextValue: AuthContextType = {
     state,
     login,
     logout,
     refreshToken,
     clearError,
+    updateUser,
   };
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

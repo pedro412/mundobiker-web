@@ -80,7 +80,7 @@ export default function BottomNavigation({}: BottomNavigationProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 z-50 pb-safe">
       <div className="flex justify-around items-center h-16 px-4">
         {navigationItems.map((item) => {
           const Icon = item.icon;
@@ -90,8 +90,10 @@ export default function BottomNavigation({}: BottomNavigationProps) {
                 variant="ghost"
                 className={cn(
                   'flex flex-col items-center justify-center h-full w-full gap-1 p-2',
-                  'hover:bg-gray-100 transition-colors',
-                  item.isActive && 'text-blue-600 bg-blue-50'
+                  'hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors',
+                  item.isActive
+                    ? 'text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-900'
+                    : 'text-gray-700 dark:text-gray-200'
                 )}
               >
                 <Icon className="w-5 h-5" />

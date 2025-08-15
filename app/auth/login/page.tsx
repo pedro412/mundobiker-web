@@ -76,25 +76,29 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4 pt-20">
       <div className="w-full max-w-md">
         <Card className="shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-gray-900">Iniciar Sesión</CardTitle>
-            <p className="text-gray-600 text-sm mt-2">Accede a tu cuenta de MundoBiker</p>
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Iniciar Sesión
+            </CardTitle>
+            <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
+              Accede a tu cuenta de MundoBiker
+            </p>
           </CardHeader>
           <CardContent>
             {showSuccessMessage && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                <p className="text-sm text-green-600">
+              <div className="mb-4 p-3 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md">
+                <p className="text-sm text-green-600 dark:text-green-200">
                   ¡Cuenta creada exitosamente! Ya puedes iniciar sesión.
                 </p>
               </div>
             )}
 
             {state.error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-600">{state.error}</p>
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md">
+                <p className="text-sm text-red-600 dark:text-red-200">{state.error}</p>
               </div>
             )}
 
@@ -137,7 +141,7 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <Link
                 href="/auth/register"
-                className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                className="text-sm text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 hover:underline"
               >
                 ¿No tienes cuenta? Regístrate aquí
               </Link>

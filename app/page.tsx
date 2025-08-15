@@ -13,7 +13,7 @@ function DashboardContent({ user }: { user: User }) {
   return (
     <main className="flex flex-col items-center justify-start min-h-screen bg-gray-50 p-4 pb-20">
       {/* Dashboard Title */}
-      <h1 className="text-3xl font-bold mb-6 text-gray-900">Panel de Control</h1>
+      <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Panel de Control</h1>
 
       {/* Dashboard Cards */}
       <div className="grid gap-4 w-full max-w-4xl md:grid-cols-2 mb-6">
@@ -35,8 +35,10 @@ function DashboardContent({ user }: { user: User }) {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Clubes</h2>
-              <p className="text-gray-600">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Clubes
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
                 Gestionar clubes de motocicletas y explorar la comunidad
               </p>
             </CardContent>
@@ -61,8 +63,10 @@ function DashboardContent({ user }: { user: User }) {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Eventos</h2>
-              <p className="text-gray-600">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Eventos
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
                 Explorar próximos eventos y reuniones de motociclistas
               </p>
             </CardContent>
@@ -88,8 +92,12 @@ function DashboardContent({ user }: { user: User }) {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Mi Perfil</h2>
-              <p className="text-gray-600">Gestionar información personal y preferencias</p>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Mi Perfil
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                Gestionar información personal y preferencias
+              </p>
             </CardContent>
           </Card>
         </Link>
@@ -119,8 +127,12 @@ function DashboardContent({ user }: { user: User }) {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Configuración</h2>
-              <p className="text-gray-600">Ajustar preferencias y configuración de la aplicación</p>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Configuración
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                Ajustar preferencias y configuración de la aplicación
+              </p>
             </CardContent>
           </Card>
         </Link>
@@ -130,23 +142,25 @@ function DashboardContent({ user }: { user: User }) {
       <div className="w-full max-w-4xl">
         <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <CardContent className="p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Acceso Rápido</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+              Acceso Rápido
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-2xl font-bold text-blue-600">🏍️</p>
-                <p className="text-sm text-gray-600">Comunidad</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Comunidad</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-green-600">📅</p>
-                <p className="text-sm text-gray-600">Eventos</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Eventos</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-purple-600">👥</p>
-                <p className="text-sm text-gray-600">Miembros</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Miembros</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-orange-600">🛣️</p>
-                <p className="text-sm text-gray-600">Rutas</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Rutas</p>
               </div>
             </div>
           </CardContent>
