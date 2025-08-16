@@ -7,6 +7,7 @@ export interface Club {
   website?: string;
   created_at: string;
   updated_at: string;
+  total_members: number;
 }
 
 export interface Chapter {
@@ -18,6 +19,7 @@ export interface Chapter {
   location?: string;
   created_at: string;
   updated_at: string;
+  total_members: number;
 }
 
 export interface Member {

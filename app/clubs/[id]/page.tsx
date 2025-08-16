@@ -3,8 +3,10 @@ import { Club, Chapter } from '@/types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { sortMembersByRole } from '@/components/ui/RoleBadge';
+import { UserCard } from '@/components/ui/UserCard';
+import { ChapterList } from '@/components/ui/ChapterList';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,6 +47,12 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
     notFound();
   }
 
+  // Helper function to find chapter by member's chapter_id
+  const findMemberChapter = (member: any) => {
+    if (!member.chapter_id) return undefined;
+    return chapters.find((chapter) => String(chapter.id) === String(member.chapter_id));
+  };
+
   return (
     <div className="p-8 max-w-4xl mx-auto">
       {/* Breadcrumb navigation */}
@@ -63,7 +71,7 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
       </Breadcrumb>
 
       {/* Club details */}
-      <Card className="shadow-lg">
+      <Card className="shadow-lg" data-testid="card-header-club">
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>
@@ -76,6 +84,7 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                   day: 'numeric',
                 })}
               </p>
+              <p>👤: {club.total_members}</p>
             </div>
             <OptimizedImage
               src={club.logo}
@@ -86,6 +95,33 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
             />
           </div>
         </CardHeader>
+        {/* Featured Members */}
+        {Array.isArray((club as any).featured_members) &&
+          (club as any).featured_members.length > 0 && (
+            <>
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold text-gray-900">
+                  Miembros Destacados ({(club as any).featured_members.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {sortMembersByRole((club as any).featured_members).map((member: any) => {
+                    const memberChapter = findMemberChapter(member);
+                    return (
+                      <UserCard
+                        key={member.id}
+                        user={member}
+                        chapter={memberChapter}
+                        showBirthDate={true}
+                        showJoinDate={false}
+                      />
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </>
+          )}
         <CardContent className="space-y-6">
           {/* Description */}
           {club.description && (
@@ -120,38 +156,10 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
 
           {/* Chapters */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               Capítulos ({chapters.length})
             </h2>
-            {chapters.length === 0 ? (
-              <p className="text-gray-600">No se encontraron capítulos para este club.</p>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {chapters.map((chapter) => (
-                  <Link key={chapter.id} href={`/chapters/${chapter.id}`}>
-                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                      <CardContent className="p-4">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{chapter.name}</h3>
-                        {chapter.description && (
-                          <p className="text-gray-600 text-sm mb-2">{chapter.description}</p>
-                        )}
-                        <div className="space-y-1">
-                          <Badge variant="outline" className="text-xs">
-                            📅 Fundado:{' '}
-                            {new Date(chapter.foundation_date).toLocaleDateString('es-MX')}
-                          </Badge>
-                          {chapter.location && (
-                            <Badge variant="outline" className="text-xs">
-                              📍 {chapter.location}
-                            </Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            )}
+            <ChapterList chapters={chapters} />
           </div>
 
           {/* Metadata */}
@@ -176,8 +184,6 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
     </div>
   );
 }
-
-// Generate metadata for SEO
 export async function generateMetadata({ params }: ClubDetailPageProps) {
   const { id } = await params;
   const club = await getClub(id);

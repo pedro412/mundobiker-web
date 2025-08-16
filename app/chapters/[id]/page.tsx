@@ -3,7 +3,6 @@ import { Chapter, Club, Member } from '@/types';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
@@ -12,6 +11,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { UserCard } from '@/components/ui/UserCard';
 
 interface ChapterDetailPageProps {
   params: Promise<{
@@ -43,19 +43,6 @@ async function getMembers(chapterId: string): Promise<Member[]> {
   } catch (error) {
     console.error('Failed to fetch members:', error);
     return [];
-  }
-}
-
-function getRoleBadgeVariant(role: string): 'default' | 'secondary' | 'destructive' | 'outline' {
-  switch (role.toLowerCase()) {
-    case 'president':
-      return 'default';
-    case 'vice-president':
-    case 'secretary':
-    case 'treasurer':
-      return 'secondary';
-    default:
-      return 'outline';
   }
 }
 
@@ -208,44 +195,12 @@ export default async function ChapterDetailPage({ params }: ChapterDetailPagePro
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {members.map((member) => (
-                  <Card key={member.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">
-                              {member.first_name} {member.last_name}
-                            </h3>
-                            {member.nickname && (
-                              <p className="text-sm text-gray-600">&quot;{member.nickname}&quot;</p>
-                            )}
-                          </div>
-                          <Badge variant={getRoleBadgeVariant(member.role)} className="text-xs">
-                            {member.role}
-                          </Badge>
-                        </div>
-
-                        <div className="space-y-1 text-xs text-gray-500">
-                          <p>👤 ID: {member.id}</p>
-                          <p>
-                            📅 Se unió: {new Date(member.joined_at).toLocaleDateString('es-MX')}
-                          </p>
-                          <p>
-                            🎂 Nacido: {new Date(member.date_of_birth).toLocaleDateString('es-MX')}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <span>Estado:</span>
-                            <Badge
-                              variant={member.is_active ? 'default' : 'outline'}
-                              className="text-xs"
-                            >
-                              {member.is_active ? 'Activo' : 'Inactivo'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <UserCard
+                    key={member.id}
+                    user={member}
+                    chapter={chapter}
+                    className="hover:shadow-md transition-shadow duration-200"
+                  />
                 ))}
               </div>
             )}
