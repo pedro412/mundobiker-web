@@ -1,12 +1,16 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { clubsApi, chaptersApi } from '@/lib/api';
 import { Club, Chapter } from '@/types';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { sortMembersByRole } from '@/components/ui/RoleBadge';
 import { UserCard } from '@/components/ui/UserCard';
 import { ChapterList } from '@/components/ui/ChapterList';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSearchParams } from 'next/navigation';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -39,12 +43,90 @@ async function getChapters(clubId: string): Promise<Chapter[]> {
   }
 }
 
-export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
-  const { id } = await params;
-  const [club, chapters] = await Promise.all([getClub(id), getChapters(id)]);
+export default function ClubDetailPage({ params }: ClubDetailPageProps) {
+  const [club, setClub] = useState<Club | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [clubId, setClubId] = useState<string>('');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const { state: authState } = useAuth();
+  const searchParams = useSearchParams();
 
-  if (!club) {
-    notFound();
+  useEffect(() => {
+    async function loadParams() {
+      const resolvedParams = await params;
+      setClubId(resolvedParams.id);
+    }
+    loadParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!clubId) return;
+
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [clubData, chaptersData] = await Promise.all([getClub(clubId), getChapters(clubId)]);
+
+        if (!clubData) {
+          setError('Club no encontrado');
+          return;
+        }
+
+        setClub(clubData);
+        setChapters(chaptersData);
+      } catch (err) {
+        console.error('Failed to fetch club data:', err);
+        setError('Error al cargar los datos del club');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [clubId]);
+
+  // Check for success message from chapter creation
+  useEffect(() => {
+    const success = searchParams.get('success');
+    if (success === 'chapter-created') {
+      setShowSuccessMessage(true);
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+
+      // Refresh chapters list to show the new chapter
+      if (clubId) {
+        getChapters(clubId)
+          .then((chaptersData) => {
+            setChapters(chaptersData);
+          })
+          .catch((error) => {
+            console.error('Failed to refresh chapters:', error);
+          });
+      }
+    }
+  }, [searchParams, clubId]);
+
+  if (loading) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <div className="flex items-center justify-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Cargando club...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !club) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-600">{error || 'Club no encontrado'}</p>
+        </div>
+      </div>
+    );
   }
 
   // Helper function to find chapter by member's chapter_id
@@ -55,6 +137,43 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <svg
+                className="w-5 h-5 text-green-600 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              <p className="text-green-800 font-medium">¡Capítulo creado exitosamente!</p>
+            </div>
+            <button
+              onClick={() => setShowSuccessMessage(false)}
+              className="text-green-600 hover:text-green-800"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumb navigation */}
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
@@ -84,7 +203,7 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
                   day: 'numeric',
                 })}
               </p>
-              <p>👤: {club.total_members}</p>
+              <p>👤 {club.total_members}</p>
             </div>
             <OptimizedImage
               src={club.logo}
@@ -156,9 +275,26 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
 
           {/* Chapters */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Capítulos ({chapters.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Capítulos ({chapters.length})
+              </h2>
+              {authState.isAuthenticated && (
+                <Link href={`/clubs/${clubId}/chapters/create`}>
+                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Crear Capítulo
+                  </button>
+                </Link>
+              )}
+            </div>
             <ChapterList chapters={chapters} />
           </div>
 
@@ -183,19 +319,4 @@ export default async function ClubDetailPage({ params }: ClubDetailPageProps) {
       </Card>
     </div>
   );
-}
-export async function generateMetadata({ params }: ClubDetailPageProps) {
-  const { id } = await params;
-  const club = await getClub(id);
-
-  if (!club) {
-    return {
-      title: 'Club No Encontrado',
-    };
-  }
-
-  return {
-    title: `${club.name} - Detalles del Club`,
-    description: club.description || `Detalles sobre ${club.name}`,
-  };
 }

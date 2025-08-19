@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import TopNavigation from '@/components/navigation/TopNavigation';
 import BottomNavigation from '@/components/navigation/BottomNavigation';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { DashboardProvider } from '@/contexts/DashboardContext';
 import './globals.css';
 
 const geistSans = Geist({
@@ -29,9 +30,11 @@ export default function RootLayout({
     <html lang="es-MX">
       <body className={`${geistSans.variable} ${geistMono.variable} pt-16 pb-16`}>
         <AuthProvider>
-          <TopNavigation />
-          <main className="min-h-screen">{children}</main>
-          <BottomNavigation />
+          <DashboardProvider>
+            <TopNavigation />
+            <main className="min-h-screen">{children}</main>
+            <BottomNavigation />
+          </DashboardProvider>
         </AuthProvider>
       </body>
     </html>

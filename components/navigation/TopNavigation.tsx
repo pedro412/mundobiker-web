@@ -35,7 +35,7 @@ export default function TopNavigation() {
       <div className="flex justify-between items-center h-16 px-4 max-w-7xl mx-auto">
         {/* Logo/Brand */}
         <div className="flex items-center">
-          <h1 className="text-xl font-bold text-blue-600 dark:text-blue-300">🏍️ Mundo Biker</h1>
+          <h1 className="text-xl font-bold text-bg">Mundo Biker</h1>
         </div>
 
         {/* User Section */}
