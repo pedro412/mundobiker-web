@@ -448,7 +448,8 @@ export default function CreateMemberPage({ params }: CreateMemberPageProps) {
                 </Label>
               </div>
               <p className="text-sm text-gray-500">
-                Los miembros activos aparecen en las listas de miembros y pueden participar en actividades del capítulo.
+                Los miembros activos aparecen en las listas de miembros y pueden participar en
+                actividades del capítulo.
               </p>
             </div>
 

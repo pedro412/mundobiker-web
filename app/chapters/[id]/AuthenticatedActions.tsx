@@ -10,7 +10,7 @@ interface AuthenticatedActionsProps {
 
 export function AuthenticatedActions({ chapterId }: AuthenticatedActionsProps) {
   const { state } = useAuth();
-  
+
   // Only render the button if user is authenticated
   if (!state.isAuthenticated || !state.user) {
     return null;

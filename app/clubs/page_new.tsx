@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useUserClubs, useIsMemberOfClub, useDashboard } from '@/contexts/DashboardContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect, Suspense, useCallback, useRef } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 // Component that uses useSearchParams - needs to be wrapped in Suspense
 function SearchParamsHandler({
@@ -19,22 +19,14 @@ function SearchParamsHandler({
   onRefreshClubs: () => void;
 }) {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const hasProcessedSuccess = useRef(false);
 
   useEffect(() => {
     const success = searchParams.get('success');
-    if (success === 'created' && !hasProcessedSuccess.current) {
-      hasProcessedSuccess.current = true;
+    if (success === 'created') {
       onSuccess();
       onRefreshClubs();
-
-      // Clear the success parameter from URL to prevent reprocessing
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('success');
-      router.replace(newUrl.pathname + newUrl.search, { scroll: false });
     }
-  }, [searchParams, onSuccess, onRefreshClubs, router]);
+  }, [searchParams, onSuccess, onRefreshClubs]);
 
   return null;
 }
@@ -49,13 +41,13 @@ function ClubsPageContent() {
   const { refreshDashboard } = useDashboard(); // Hook to refresh dashboard data
   const { state: authState } = useAuth();
 
-  const handleSuccess = useCallback(() => {
+  const handleSuccess = () => {
     setShowSuccessMessage(true);
     // Auto-hide success message after 5 seconds
     setTimeout(() => setShowSuccessMessage(false), 5000);
-  }, []);
+  };
 
-  const handleRefreshClubs = useCallback(async () => {
+  const handleRefreshClubs = async () => {
     try {
       const clubsData = await clubsApi.getAll();
       setClubs(clubsData);
@@ -64,7 +56,7 @@ function ClubsPageContent() {
     } catch (err) {
       console.error('Failed to refresh clubs:', err);
     }
-  }, [refreshDashboard]);
+  };
 
   useEffect(() => {
     async function fetchClubs() {
