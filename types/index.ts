@@ -28,9 +28,12 @@ export interface Member {
   first_name: string;
   last_name: string;
   nickname?: string;
-  date_of_birth: string;
+  date_of_birth?: string;
   role: string;
-  joined_at: string;
+  member_type: string;
+  national_role?: string;
+  profile_picture?: string;
+  joined_at?: string;
   user?: number | null;
   is_active: boolean;
   created_at: string;

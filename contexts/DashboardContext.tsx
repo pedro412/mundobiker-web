@@ -142,6 +142,12 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
       }
 
       const dashboardData = await response.json();
+      console.log('Dashboard data fetched:', {
+        totalMembers: dashboardData.stats?.total_members,
+        myMemberships: dashboardData.my_memberships?.length,
+        myChapters: dashboardData.my_chapters?.length,
+        myClubs: dashboardData.my_clubs?.length,
+      });
       dispatch({ type: 'DASHBOARD_SUCCESS', payload: dashboardData });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al cargar el dashboard';
@@ -177,7 +183,9 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
   // Refresh dashboard data
   const refreshDashboard = useCallback(async (): Promise<void> => {
+    console.log('Dashboard refresh requested - fetching latest overview data...');
     await fetchDashboardOverview();
+    console.log('Dashboard refresh completed');
   }, [fetchDashboardOverview]);
 
   // Clear error function

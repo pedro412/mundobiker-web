@@ -113,6 +113,22 @@ export const membersApi = {
   getById: async (id: string): Promise<Member> => {
     return await api.get(`/api/members/${id}/`);
   },
+  create: async (memberData: FormData, authToken: string): Promise<Member> => {
+    const response = await fetch(`${API_BASE_URL}/api/members/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: memberData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw { status: response.status, data: errorData };
+    }
+
+    return response.json();
+  },
 };
 
 export const eventsApi = {

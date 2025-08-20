@@ -1,3 +1,5 @@
+'use client';
+
 import { chaptersApi, clubsApi, membersApi } from '@/lib/api';
 import { Chapter, Club, Member } from '@/types';
 import Link from 'next/link';
@@ -12,11 +14,19 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { UserCard } from '@/components/ui/UserCard';
+import { AuthenticatedActions } from './AuthenticatedActions';
 
-interface ChapterDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+// Client component for success message
+function SuccessMessage({ searchParams }: { searchParams: Promise<{ memberCreated?: string }> }) {
+  const resolvedSearchParams = use(searchParams);
+  if (resolvedSearchParams.memberCreated === 'true') {
+    return (
+      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <p className="text-green-700">✅ ¡Miembro creado exitosamente!</p>
+      </div>
+    );
+  }
+  return null;
 }
 
 async function getChapter(id: string): Promise<Chapter | null> {
@@ -46,18 +56,75 @@ async function getMembers(chapterId: string): Promise<Member[]> {
   }
 }
 
-export default async function ChapterDetailPage({ params }: ChapterDetailPageProps) {
-  const { id } = await params;
-  const [chapter, members] = await Promise.all([getChapter(id), getMembers(id)]);
+import React, { useEffect, useState, use } from 'react';
+
+interface ChapterDetailPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+  searchParams: Promise<{
+    memberCreated?: string;
+  }>;
+}
+
+export default function ChapterDetailPage({ params, searchParams }: ChapterDetailPageProps) {
+  const { id } = use(params);
+  const [chapter, setChapter] = useState<Chapter | null>(null);
+  const [club, setClub] = useState<Club | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const chapterData = await getChapter(id);
+        if (!chapterData) {
+          notFound();
+          return;
+        }
+        if (isMounted) {
+          setChapter(chapterData);
+        }
+        const [clubData, membersData] = await Promise.all([
+          getClub(chapterData.club),
+          getMembers(id),
+        ]);
+        if (isMounted) {
+          setClub(clubData);
+          setMembers(membersData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    fetchData();
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="p-8 max-w-6xl mx-auto">
+        <p className="text-gray-600">Cargando...</p>
+      </div>
+    );
+  }
 
   if (!chapter) {
     notFound();
+    return null;
   }
-
-  const club = await getClub(chapter.club);
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
+      {/* Success message */}
+      <SuccessMessage searchParams={searchParams} />
+
       {/* Breadcrumb navigation */}
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
@@ -170,6 +237,7 @@ export default async function ChapterDetailPage({ params }: ChapterDetailPagePro
 
             {/* Action buttons */}
             <div className="flex gap-4 pt-6 border-t">
+              <AuthenticatedActions chapterId={chapter.id} />
               {club && (
                 <Button asChild>
                   <Link href={`/clubs/${club.id}`}>Ver Club Padre</Link>
@@ -209,24 +277,4 @@ export default async function ChapterDetailPage({ params }: ChapterDetailPagePro
       </div>
     </div>
   );
-}
-
-// Generate metadata for SEO
-export async function generateMetadata({ params }: ChapterDetailPageProps) {
-  const { id } = await params;
-  const chapter = await getChapter(id);
-
-  if (!chapter) {
-    return {
-      title: 'Capítulo No Encontrado',
-    };
-  }
-
-  const club = await getClub(chapter.club);
-  const clubName = club ? club.name : 'Club Desconocido';
-
-  return {
-    title: `${chapter.name} - Capítulo de ${clubName}`,
-    description: chapter.description || `Detalles sobre el capítulo ${chapter.name} de ${clubName}`,
-  };
 }
