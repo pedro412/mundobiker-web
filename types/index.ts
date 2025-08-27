@@ -17,6 +17,8 @@ export interface Chapter {
   foundation_date: string;
   club: number;
   location?: string;
+  latitude?: number;
+  longitude?: number;
   created_at: string;
   updated_at: string;
   total_members: number;

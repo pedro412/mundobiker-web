@@ -79,6 +79,10 @@ export const clubsApi = {
 };
 
 export const chaptersApi = {
+  getAll: async (): Promise<Chapter[]> => {
+    const response: ApiResponse<Chapter> = await api.get('/api/chapters/');
+    return response.results;
+  },
   getByClub: async (clubId: string | number): Promise<Chapter[]> => {
     const response: ApiResponse<Chapter> = await api.get(`/api/chapters/?club=${clubId}`);
     return response.results;
