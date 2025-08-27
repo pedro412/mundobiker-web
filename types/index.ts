@@ -38,6 +38,10 @@ export interface Member {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  metadata?: {
+    is_vested?: boolean;
+    linked_to?: number;
+  };
 }
 
 export interface ApiResponse<T> {

@@ -6,6 +6,7 @@ import { Club, Chapter } from '@/types';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
+import { ReadMoreText } from '@/components/ui/ReadMoreText';
 import { sortMembersByRole } from '@/components/ui/RoleBadge';
 import { UserCard } from '@/components/ui/UserCard';
 import { ChapterList } from '@/components/ui/ChapterList';
@@ -246,7 +247,11 @@ export default function ClubDetailPage({ params }: ClubDetailPageProps) {
           {club.description && (
             <div className="mb-6">
               <h2 className="text-2xl font-semibold text-gray-900 mb-3">Acerca de</h2>
-              <p className="text-gray-700 leading-relaxed">{club.description}</p>
+              <ReadMoreText
+                text={club.description}
+                maxLength={300}
+                className="text-gray-700 leading-relaxed"
+              />
             </div>
           )}
 

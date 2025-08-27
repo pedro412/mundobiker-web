@@ -42,6 +42,9 @@ const memberSchema = z.object({
   national_role: z.string().optional(),
   joined_at: z.string().optional(),
   is_active: z.boolean(),
+  // Metadata fields
+  is_vested: z.boolean().optional(),
+  linked_to: z.string().optional(),
 });
 
 type MemberFormData = z.infer<typeof memberSchema>;
@@ -92,6 +95,7 @@ export default function CreateMemberPage({ params }: CreateMemberPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [chapterName, setChapterName] = useState<string>('');
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const [existingMembers, setExistingMembers] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize React Hook Form
@@ -113,6 +117,8 @@ export default function CreateMemberPage({ params }: CreateMemberPageProps) {
       national_role: '',
       joined_at: '',
       is_active: true,
+      is_vested: false,
+      linked_to: '',
     },
   });
 
@@ -127,9 +133,14 @@ export default function CreateMemberPage({ params }: CreateMemberPageProps) {
         // Set chapter ID in form data
         setValue('chapter', id);
 
-        // Load chapter info
-        const chapter = await chaptersApi.getById(id);
+        // Load chapter info and existing members
+        const [chapter, members] = await Promise.all([
+          chaptersApi.getById(id),
+          membersApi.getByChapter(id),
+        ]);
+
         setChapterName(chapter.name);
+        setExistingMembers(members);
       } catch (error) {
         console.error('Failed to load chapter info:', error);
         setError('Error al cargar la información del capítulo');
@@ -179,6 +190,19 @@ export default function CreateMemberPage({ params }: CreateMemberPageProps) {
       submitData.append('role', data.role);
       submitData.append('member_type', data.member_type);
       submitData.append('is_active', data.is_active.toString());
+
+      // Handle metadata
+      const metadata: any = {};
+      if (data.is_vested !== undefined) {
+        metadata.is_vested = data.is_vested;
+      }
+      if (data.linked_to && data.linked_to.trim()) {
+        metadata.linked_to = parseInt(data.linked_to);
+      }
+
+      if (Object.keys(metadata).length > 0) {
+        submitData.append('metadata', JSON.stringify(metadata));
+      }
 
       // Log the chapter ID being sent
       console.log('Creating member for chapter ID:', data.chapter);
@@ -451,6 +475,48 @@ export default function CreateMemberPage({ params }: CreateMemberPageProps) {
                 Los miembros activos aparecen en las listas de miembros y pueden participar en
                 actividades del capítulo.
               </p>
+            </div>
+
+            {/* Metadata Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">Información Especial</h3>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  id="is_vested"
+                  type="checkbox"
+                  {...register('is_vested')}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <Label htmlFor="is_vested" className="text-sm font-medium text-gray-700">
+                  Miembro Investido (Vested)
+                </Label>
+              </div>
+              <p className="text-sm text-gray-500">
+                Los miembros investidos tienen privilegios especiales y aparecen con una marca
+                distintiva.
+              </p>
+
+              <div>
+                <Label htmlFor="linked_to">Vinculado a Miembro</Label>
+                <select
+                  id="linked_to"
+                  {...register('linked_to')}
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 bg-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                >
+                  <option value="">-- Sin vinculación --</option>
+                  {existingMembers.map((member) => (
+                    <option key={member.id} value={member.id.toString()}>
+                      {member.first_name} {member.last_name}
+                      {member.nickname && ` "${member.nickname}"`}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-sm text-gray-500 mt-1">
+                  Si este miembro está vinculado a otro (pareja, copiloto, etc.), selecciona el
+                  miembro principal. Aparecerán juntos en la misma tarjeta.
+                </p>
+              </div>
             </div>
 
             {/* Action Buttons */}

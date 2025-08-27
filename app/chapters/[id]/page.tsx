@@ -13,8 +13,9 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { UserCard } from '@/components/ui/UserCard';
+import { LinkedUserCard } from '@/components/ui/LinkedUserCard';
 import { AuthenticatedActions } from './AuthenticatedActions';
+import { ReadMoreText } from '@/components/ui/ReadMoreText';
 
 // Client component for success message
 function SuccessMessage({ searchParams }: { searchParams: Promise<{ memberCreated?: string }> }) {
@@ -74,6 +75,52 @@ export default function ChapterDetailPage({ params, searchParams }: ChapterDetai
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Function to group members based on linked_to metadata
+  const groupMembers = (membersList: Member[]) => {
+    const groups: { primary: Member; linked?: Member }[] = [];
+    const processed = new Set<string | number>();
+
+    membersList.forEach((member) => {
+      if (processed.has(member.id)) return;
+
+      const linkedToId = member.metadata?.linked_to;
+
+      if (linkedToId) {
+        // This member is linked to someone else
+        const primaryMember = membersList.find((m) => m.id === linkedToId);
+        if (primaryMember && !processed.has(primaryMember.id)) {
+          groups.push({
+            primary: primaryMember,
+            linked: member,
+          });
+          processed.add(member.id);
+          processed.add(primaryMember.id);
+        } else if (!processed.has(member.id)) {
+          // Primary member not found or already processed, show as standalone
+          groups.push({ primary: member });
+          processed.add(member.id);
+        }
+      } else {
+        // Check if someone is linked to this member
+        const linkedMember = membersList.find((m) => m.metadata?.linked_to === member.id);
+        if (linkedMember && !processed.has(linkedMember.id)) {
+          groups.push({
+            primary: member,
+            linked: linkedMember,
+          });
+          processed.add(member.id);
+          processed.add(linkedMember.id);
+        } else if (!processed.has(member.id)) {
+          // No one linked to this member, show as standalone
+          groups.push({ primary: member });
+          processed.add(member.id);
+        }
+      }
+    });
+
+    return groups;
+  };
+
   useEffect(() => {
     let isMounted = true;
     async function fetchData() {
@@ -93,6 +140,7 @@ export default function ChapterDetailPage({ params, searchParams }: ChapterDetai
         ]);
         if (isMounted) {
           setClub(clubData);
+          console.log(membersData, 'mb');
           setMembers(membersData);
         }
       } catch (error) {
@@ -194,7 +242,11 @@ export default function ChapterDetailPage({ params, searchParams }: ChapterDetai
                   </svg>
                 </Link>
                 {club.description && (
-                  <p className="text-gray-600 text-sm mt-1">{club.description}</p>
+                  <ReadMoreText
+                    text={club.description}
+                    maxLength={100}
+                    className="text-gray-600 text-sm mt-1"
+                  />
                 )}
               </div>
             )}
@@ -205,7 +257,11 @@ export default function ChapterDetailPage({ params, searchParams }: ChapterDetai
                 <h2 className="text-2xl font-semibold text-gray-900 mb-3">
                   Acerca de este Capítulo
                 </h2>
-                <p className="text-gray-700 leading-relaxed">{chapter.description}</p>
+                <ReadMoreText
+                  text={chapter.description}
+                  maxLength={300}
+                  className="text-gray-700 leading-relaxed"
+                />
               </div>
             )}
 
@@ -262,10 +318,11 @@ export default function ChapterDetailPage({ params, searchParams }: ChapterDetai
               <p className="text-gray-600">No se encontraron miembros para este capítulo.</p>
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {members.map((member) => (
-                  <UserCard
-                    key={member.id}
-                    user={member}
+                {groupMembers(members).map((group, index) => (
+                  <LinkedUserCard
+                    key={`${group.primary.id}-${group.linked?.id || 'single'}-${index}`}
+                    primaryUser={group.primary}
+                    linkedUser={group.linked}
                     chapter={chapter}
                     className="hover:shadow-md transition-shadow duration-200"
                   />

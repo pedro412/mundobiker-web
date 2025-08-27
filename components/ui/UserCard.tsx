@@ -1,5 +1,4 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { RoleBadge } from '@/components/ui/RoleBadge';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 
@@ -37,75 +36,85 @@ export function UserCard({
   const hasLocalRole = user.role && user.role.trim() !== '';
 
   return (
-    <Card className={`hover:shadow-md transition-shadow ${className || ''}`}>
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {/* Header with profile picture and name */}
-          <div className="flex items-start gap-3">
-            {/* Profile Picture */}
-            <div className="flex-shrink-0">
-              {user.profile_picture ? (
-                <OptimizedImage
-                  src={user.profile_picture}
-                  alt={`${user.first_name} ${user.last_name}`}
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center border-2 border-gray-200">
-                  <span className="text-gray-600 font-semibold text-lg">
-                    {user.first_name.charAt(0)}
-                    {user.last_name.charAt(0)}
-                  </span>
+    <Card className={`hover:shadow-lg transition-all duration-200 ${className || ''}`}>
+      <CardContent className="p-6">
+        <div className="flex flex-col items-center text-center space-y-4">
+          {/* Profile Picture - Large and Centered */}
+          <div className="relative">
+            {user.profile_picture ? (
+              <OptimizedImage
+                src={user.profile_picture}
+                alt={`${user.first_name} ${user.last_name}`}
+                width={80}
+                height={80}
+                className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center border-4 border-white shadow-lg">
+                <span className="text-white font-bold text-2xl">
+                  {user.first_name.charAt(0)}
+                  {user.last_name.charAt(0)}
+                </span>
+              </div>
+            )}
+            {/* Active Status Indicator */}
+            <div
+              className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-3 border-white ${
+                user.is_active ? 'bg-green-500' : 'bg-gray-400'
+              }`}
+            >
+              <span className="sr-only">{user.is_active ? 'Activo' : 'Inactivo'}</span>
+            </div>
+          </div>
+
+          {/* Name and Nickname */}
+          <div className="space-y-1">
+            <h3 className="font-bold text-gray-900 text-lg">
+              {user.first_name} {user.last_name}
+            </h3>
+            {user.nickname && (
+              <p className="text-sm text-gray-600 font-medium">&quot;{user.nickname}&quot;</p>
+            )}
+          </div>
+
+          {/* Role Badges */}
+          <div className="flex flex-col items-center gap-2">
+            {hasNationalRole && (
+              <RoleBadge role={user.national_role!} className="text-xs font-medium" />
+            )}
+            {hasLocalRole && (
+              <RoleBadge
+                role={user.role!}
+                chapterName={chapter?.name}
+                className="text-xs font-medium"
+              />
+            )}
+            {!hasNationalRole && !hasLocalRole && (
+              <RoleBadge
+                role="member"
+                chapterName={chapter?.name}
+                className="text-xs font-medium"
+              />
+            )}
+          </div>
+
+          {/* Optional Date Information */}
+          {(showBirthDate || showJoinDate) && (
+            <div className="pt-2 border-t border-gray-100 w-full space-y-2">
+              {showBirthDate && user.date_of_birth && (
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                  <span>🎂</span>
+                  <span>{new Date(user.date_of_birth).toLocaleDateString('es-MX')}</span>
+                </div>
+              )}
+              {showJoinDate && user.joined_at && (
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                  <span>📅</span>
+                  <span>Se unió {new Date(user.joined_at).toLocaleDateString('es-MX')}</span>
                 </div>
               )}
             </div>
-
-            {/* Name Info */}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 text-lg">
-                {user.first_name} {user.last_name}
-              </h3>
-              {user.nickname && (
-                <p className="text-sm text-gray-600">&quot;{user.nickname}&quot;</p>
-              )}
-            </div>
-          </div>
-
-          {/* Role Badges Section */}
-          <div className="flex flex-wrap gap-1">
-            {hasNationalRole && <RoleBadge role={user.national_role!} className="text-xs" />}
-            {hasLocalRole && (
-              <RoleBadge role={user.role!} chapterName={chapter?.name} className="text-xs" />
-            )}
-            {!hasNationalRole && !hasLocalRole && (
-              <RoleBadge role="member" chapterName={chapter?.name} className="text-xs" />
-            )}
-          </div>
-
-          {/* Status and Additional Info */}
-          <div className="space-y-2">
-            {/* Status Badge */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">Estado:</span>
-              <Badge variant={user.is_active ? 'default' : 'outline'} className="text-xs">
-                {user.is_active ? 'Activo' : 'Inactivo'}
-              </Badge>
-            </div>
-
-            {/* Optional Date Information */}
-            {(showBirthDate || showJoinDate) && (
-              <div className="space-y-1 text-xs text-gray-500">
-                {showBirthDate && user.date_of_birth && (
-                  <p>🎂 Nacido: {new Date(user.date_of_birth).toLocaleDateString('es-MX')}</p>
-                )}
-                {showJoinDate && user.joined_at && (
-                  <p>📅 Se unió: {new Date(user.joined_at).toLocaleDateString('es-MX')}</p>
-                )}
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

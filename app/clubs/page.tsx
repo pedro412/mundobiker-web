@@ -5,6 +5,7 @@ import { Club } from '@/types';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ReadMoreText } from '@/components/ui/ReadMoreText';
 import { useUserClubs, useIsMemberOfClub, useDashboard } from '@/contexts/DashboardContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect, Suspense, useCallback, useRef } from 'react';
@@ -237,7 +238,11 @@ function ClubsPageContent() {
                       </CardHeader>
                       <CardContent>
                         {club.description && (
-                          <p className="text-gray-600 mb-3 text-sm">{club.description}</p>
+                          <ReadMoreText
+                            text={club.description}
+                            maxLength={120}
+                            className="text-gray-600 mb-3 text-sm"
+                          />
                         )}
                         <div className="space-y-2">
                           <p className="text-sm text-gray-500 flex items-center">
@@ -285,7 +290,11 @@ function ClubsPageContent() {
                     </CardHeader>
                     <CardContent>
                       {club.description && (
-                        <p className="text-gray-600 mb-3 text-sm">{club.description}</p>
+                        <ReadMoreText
+                          text={club.description}
+                          maxLength={120}
+                          className="text-gray-600 mb-3 text-sm"
+                        />
                       )}
                       <div className="space-y-2">
                         <p className="text-sm text-gray-500 flex items-center">

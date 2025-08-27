@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ReadMoreText } from '@/components/ui/ReadMoreText';
 
 interface Chapter {
   id: string | number;
@@ -48,7 +49,11 @@ export function ChapterList({ chapters, className }: ChapterListProps) {
                   <div className="col-span-6">
                     <h3 className="font-semibold text-gray-900 text-lg mb-1">{chapter.name}</h3>
                     {chapter.description && (
-                      <p className="text-sm text-gray-600 line-clamp-2">{chapter.description}</p>
+                      <ReadMoreText
+                        text={chapter.description}
+                        maxLength={80}
+                        className="text-sm text-gray-600"
+                      />
                     )}
                   </div>
 
@@ -86,7 +91,11 @@ export function ChapterList({ chapters, className }: ChapterListProps) {
                   <div>
                     <h3 className="font-semibold text-gray-900 text-base mb-1">{chapter.name}</h3>
                     {chapter.description && (
-                      <p className="text-xs text-gray-600 line-clamp-2">{chapter.description}</p>
+                      <ReadMoreText
+                        text={chapter.description}
+                        maxLength={60}
+                        className="text-xs text-gray-600"
+                      />
                     )}
                   </div>
 
