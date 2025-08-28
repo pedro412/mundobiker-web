@@ -77,7 +77,7 @@ export default function ChapterDetailPage({ params, searchParams }: ChapterDetai
 
   // Function to group members based on linked_to metadata
   const groupMembers = (membersList: Member[]) => {
-    const groups: { primary: Member; linked?: Member }[] = [];
+    const groups: { primary: Member; linkedMembers: Member[] }[] = [];
     const processed = new Set<string | number>();
 
     membersList.forEach((member) => {
@@ -86,35 +86,23 @@ export default function ChapterDetailPage({ params, searchParams }: ChapterDetai
       const linkedToId = member.metadata?.linked_to;
 
       if (linkedToId) {
-        // This member is linked to someone else
-        const primaryMember = membersList.find((m) => m.id === linkedToId);
-        if (primaryMember && !processed.has(primaryMember.id)) {
-          groups.push({
-            primary: primaryMember,
-            linked: member,
-          });
-          processed.add(member.id);
-          processed.add(primaryMember.id);
-        } else if (!processed.has(member.id)) {
-          // Primary member not found or already processed, show as standalone
-          groups.push({ primary: member });
-          processed.add(member.id);
-        }
+        // This member is linked to someone else, skip for now
+        return;
       } else {
-        // Check if someone is linked to this member
-        const linkedMember = membersList.find((m) => m.metadata?.linked_to === member.id);
-        if (linkedMember && !processed.has(linkedMember.id)) {
-          groups.push({
-            primary: member,
-            linked: linkedMember,
-          });
-          processed.add(member.id);
+        // This member is potentially a primary member
+        // Find all members linked to this member
+        const linkedMembers = membersList.filter((m) => m.metadata?.linked_to === member.id);
+
+        groups.push({
+          primary: member,
+          linkedMembers: linkedMembers,
+        });
+
+        // Mark all processed members
+        processed.add(member.id);
+        linkedMembers.forEach((linkedMember) => {
           processed.add(linkedMember.id);
-        } else if (!processed.has(member.id)) {
-          // No one linked to this member, show as standalone
-          groups.push({ primary: member });
-          processed.add(member.id);
-        }
+        });
       }
     });
 
@@ -320,9 +308,9 @@ export default function ChapterDetailPage({ params, searchParams }: ChapterDetai
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {groupMembers(members).map((group, index) => (
                   <LinkedUserCard
-                    key={`${group.primary.id}-${group.linked?.id || 'single'}-${index}`}
+                    key={`${group.primary.id}-${group.linkedMembers.map((m) => m.id).join('-')}-${index}`}
                     primaryUser={group.primary}
-                    linkedUser={group.linked}
+                    linkedUsers={group.linkedMembers}
                     chapter={chapter}
                     className="hover:shadow-md transition-shadow duration-200"
                   />
